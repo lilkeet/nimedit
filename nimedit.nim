@@ -1045,20 +1045,22 @@ proc draw(events: sink seq[Event]; ed: Editor) =
   let sh = ed.sh
   # position of the tab bar hard coded for now as we don't want to adapt it
   # to the main margin (tried it, is ugly):
-  let activeTab = drawTabBar(ed.bar, sh.theme, 47, ed.screenW,
-                             events, ed.main)
-  if activeTab != nil:
+  let maybeNewlySelectedTab = drawTabBar(ed.bar, sh.theme, 47, ed.screenW,
+    events, ed.main)
+  if maybeNewlySelectedTab.isSome:
+    let newlySelectedTab = maybeNewlySelectedTab.get()
+
     if (getMouseState(nil, nil) and SDL_BUTTON(BUTTON_RIGHT)) != 0:
       let oldMain = main
-      if not activeTab.changed:
-        ed.removeBuffer(activeTab)
-        if oldMain != activeTab: main = oldMain
+      if not newlySelectedTab.changed:
+        ed.removeBuffer(newlySelectedTab)
+        if oldMain != newlySelectedTab: main = oldMain
       else:
         ed.sh.state = requestedCloseTab
-        main = activeTab
+        main = newlySelectedTab
         ed.askForQuitTab()
     else:
-      main = activeTab
+      main = newlySelectedTab
     focus = main
 
   var rawMainRect = ed.mainRect

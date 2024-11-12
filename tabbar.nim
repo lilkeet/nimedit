@@ -2,6 +2,10 @@
 
 import buffertype, themes
 import sdl2, sdl2/ttf, prims
+import
+  std/[options]
+
+export options
 
 type
   TabBar* = object
@@ -130,7 +134,12 @@ proc drawButtonList*(buttons: openArray[string]; t: Internaltheme;
 
 proc drawTabBar*(tabs: var TabBar; t: InternalTheme;
                  x, screenW: cint; events: seq[Event];
-                 active: Buffer): Buffer =
+                 active: Buffer): Option[Buffer] =
+  ## Draws a tabbar at the input location.
+  ## If we should switch to a different buffer from the currently displayed,
+  ## the buffer that should be switched to is returned.
+  result = none(Buffer)
+
   var it = tabs.first
   var activeDrawn = false
   var xx = x # 15.cint
@@ -156,7 +165,7 @@ proc drawTabBar*(tabs: var TabBar; t: InternalTheme;
         if w.clicks.int >= 1:
           let p = point(w.x, w.y)
           if rect.contains(p):
-            result = it
+            result = some(it)
       elif e.kind == MouseMotion:
         let w = e.motion
         if (w.state and BUTTON_LMASK) != 0:
